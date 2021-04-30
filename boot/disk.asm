@@ -35,10 +35,43 @@ disk_load:
 	; [es:bx] <- Pointer to buffer where the data will be stored
 	; Caller sets it up for us, and it is actually the standard location for int 13h
 	int	0x13		; BIOS interrupt
-	jc	disk_error	; if error (stored in the carry bit)
+	jc	disk_error	; If error (stored in the carry bit)
 
 	pop	dx
 	cmp	al, dh		; BIOS also sets 'al' to the # of sectors read. Compare it.
 	jne	sectors_error
 	popa
 	ret
+
+
+disk_error:
+	mov	di, DISK_ERROR
+	call	print
+	mov	dh, ah
+	mov	si, 4
+	sub	sp, si
+	mov	bx, sp
+	mov	[bx], dx
+	mov	di, sp
+	call	print_hexdump
+	jmp	end
+
+
+sectors_error:
+	mov	di, SECTORS_ERROR
+	call	print
+
+end:
+	rep	nop
+	jmp 	end
+
+
+%include "lib/print.asm"
+%include "lib/hexdump.asm"
+
+DISK_ERROR: db "Disk read error", 0
+SECTORS_ERROR: db "Incorrect number of sectors read", 0
+
+	; Padding and magic number
+	times 510 - ($ - $$) db 0
+	dw 0xaa55

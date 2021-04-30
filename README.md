@@ -1,9 +1,6 @@
 
-# Hako OS
-I want to know about computer better, so I decided to start writing my own OS.
-Because creating an OS is not only about programming, it is also about how
-computer really works.
-
+# GNUWeeb Kernel
+GNUWeeb Kernel - This is not yet a mother of any operating system.
 
 # Author
 ```
