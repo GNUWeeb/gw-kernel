@@ -15,8 +15,6 @@ boot: boot.bin
 
 boot.bin: boot.asm
 	$(NASM) -fbin $(^) -o $(@)
-	$(DD) if=readme.txt >> $(@)
-	$(DD) if=/dev/zero bs=512 count=1 >> $(@)
 
 clean:
 	$(RM) -vf boot.bin

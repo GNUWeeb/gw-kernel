@@ -4,18 +4,21 @@
 ; Copyright (C) 2021  Ammar Faizi <ammarfaizi2@gmail.com>
 ;
 
-[org 0]
-BITS 16
+[org 0x7c00]
+[BITS 16]
+
+CODE_SEG equ gdt_code - gdt_start
+DATA_SEG equ gdt_data - gdt_start
 
 __start:
 	jmp	short _start
 	nop
 	times 33 db 0
 _start:
-	jmp	0x7c0:start
+	jmp	0x0:start
 start:
 	cli
-	mov	ax, 0x7c0
+	xor	ax, ax
 	mov	ds, ax
 	mov	es, ax
 
@@ -24,75 +27,71 @@ start:
 	mov	sp, 0x7c00
 	sti
 
-	; [int 0x13]
-	;
-	; DISK - READ SECTOR(S) INTO MEMORY
-	;
-	; AH = 02h
-	; AL = number of sectors to read (must be nonzero)
-	; CH = low eight bits of cylinder number
-	; CL = sector number 1-63 (bits 0-5)
-	; high two bits of cylinder (bits 6-7, hard disk only)
-	; DH = head number
-	; DL = drive number (bit 7 set for hard disk)
-	; ES:BX -> data buffer
-
-	; Return:
-	; CF set on error
-	; if AH = 11h (corrected ECC error), AL = burst length
-	; CF clear if successful
-	; AH = status (see #00234)
-	; AL = number of sectors transferred (only valid if CF set for some BIOSes)
-	;
-	; Ref: http://www.ctyme.com/intr/rb-0607.htm
-	;
-
-	mov	ah, 0x2		; READ SECTOR command.
-	mov	al, 0x1 	; Read 1 sector.
-	xor	ch, ch 		; Cylinder number.
-	mov	cl, 2		; The sector number to be read.
-	xor	dh, dh		; Head number.
-				; dl has already been set by BIOS.
-	mov	bx, buffer	; Load the buffer.
-	int	0x13
-	jc	.disk_error	; If error, CF (Carry Flag) is set.
-
-	mov	si, buffer
-	call	print_str
-	jmp	.end
-
-.disk_error:
-	mov	si, disk_err_msg
-	call	print_str
-
-
-.end:
+.load_protected:
 	cli
+	lgdt	[gdt_descriptor]
+	; Whee, we are entering the protected mode!
+	mov	eax, cr0
+	or	eax, 1
+	mov	cr0, eax
+	jmp	CODE_SEG:load32
+
+
+; GDT
+gdt_start:
+
+gdt_null:
+	dd	0x0
+	dd	0x0
+	; Offset 0x8
+gdt_code:			; CS should point to this label.
+	dw	0xffff		; Segment limit first 0-15 bit.
+	dw	0x0		; Base first 0-15 bits.
+	db	0x0		; Base 16-23 bits.
+	db	0x9a		; Access byte.
+	db	11001111b	; High 4 bit flags and low 4 bit flags.
+	db	0x0		; Base 24-31 bits.
+	; Offset 0x10
+
+gdt_data:			; DS, SS, ES, FS, GS
+	dw	0xffff		; Segment limit first 0-15 bit.
+	dw	0x0		; Base first 0-15 bits.
+	db	0x0		; Base 16-23 bits.
+	db	0x92		; Access byte.
+	db	11001111b	; High 4 bit flags and low 4 bit flags.
+	db	0x0		; Base 24-31 bits.
+gdt_end:
+
+gdt_descriptor:
+	dw	gdt_end - gdt_start - 1
+	dd	gdt_start
+
+[BITS 32]
+load32:
+.end:
+	mov	ax, DATA_SEG
+	mov	ds, ax
+	mov	es, ax
+	mov	fs, ax
+	mov	gs, ax
+	mov	ss, ax
+	mov	ebp, 0x00200000
+	mov	esp, ebp
+	cli
+
+	;
+	; Enable the A20 line
+	; Ref: https://wiki.osdev.org/A20_Line
+	;
+	in	al, 0x92
+	or	al, 0x2
+	out	0x92, al
+
 .end_loop:
 	hlt
 	jmp	.end_loop
 
 
-; print_str(const char *si);
-print_str:
-	xor	bx, bx
-.pr_loop:
-	lodsb
-	test	al, al
-	jz	.done
-	mov	ah, 0xe
-	int	0x10
-	jmp	.pr_loop
-.done:
-	ret
-
-disk_err_msg:
-	db "Error: Failed to load sector!", 0
-
 end_of_code:
 	times 510 - ($ - $$) db 0
 	dw 0xaa55
-
-buffer:
-	; The content buffer will be here.
-
