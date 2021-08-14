@@ -6,5 +6,12 @@ This is not yet a mother of any operating system.
 
 Under development.
 
+Setup Instructions:
+  sudo apt-get install make nasm qemu-system-x86 -y;
+  git clone https://github.com/GNUWeeb/gw-kernel;
+  cd gw-kernel;
+  make;
+  make boot;
+
 Maintainer:
-- Ammar Faizi <ammarfaizi2@gnuweeb.org>
+  - Ammar Faizi <ammarfaizi2@gnuweeb.org>
