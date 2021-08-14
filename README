@@ -2,17 +2,15 @@
 GNU/Weeb kernel
 ============
 
-This is not yet a mother of any operating system.
-
-Under development.
-
-Assuming you're working from x86-64 environment, you will need a cross
-compiler to work with, here are the setup instruction steps.
+This is not yet a mother of any operating system. Under development.
 
 The target arch is i686.
 
-[Setup Instructions]
+Assuming you're working from x86-64 environment, you will need a cross
+compiler to work with, below are the setup instructions.
 
+[Setup Instructions]
+------------------------------------------------
 # Install dependencies.
 sudo apt-get install build-essential bison flex libgmp3-dev git \
 libmpc-dev libmpfr-dev texinfo libisl-dev make nasm \
@@ -54,7 +52,10 @@ cd ../..;
 
 # Build the kernel.
 make;
+
+# Boot the kernel under QEMU.
 make boot;
+------------------------------------------------
 
 Maintainer:
   - Ammar Faizi <ammarfaizi2@gnuweeb.org>
