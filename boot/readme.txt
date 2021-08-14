@@ -1,1 +1,0 @@
-Hi everyone, this is a text file I read from disk.

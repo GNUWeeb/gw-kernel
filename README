@@ -6,12 +6,55 @@ This is not yet a mother of any operating system.
 
 Under development.
 
-Setup Instructions:
-  sudo apt-get install make nasm qemu-system-x86 -y;
-  git clone https://github.com/GNUWeeb/gw-kernel;
-  cd gw-kernel;
-  make;
-  make boot;
+Assuming you're working from x86-64 environment, you will need a cross
+compiler to work with, here are the setup instruction steps.
+
+The target arch is i686.
+
+[Setup Instructions]
+
+# Install dependencies.
+sudo apt-get install build-essential bison flex libgmp3-dev git \
+libmpc-dev libmpfr-dev texinfo libisl-dev make nasm \
+qemu-system-x86-y;
+
+# Clone the repository.
+git clone https://github.com/GNUWeeb/gw-kernel;
+
+# Create build dir and change working dir to it.
+mkdir -pv gw-kernel/build;
+cd gw-kernel/build;
+
+# Download binutils.
+wget https://ftp.gnu.org/gnu/binutils/binutils-2.37.tar.xz;
+
+# Download GCC.
+wget http://ftp.tsukuba.wide.ad.jp/software/gcc/releases/gcc-11.2.0/gcc-11.2.0.tar.xz;
+
+# Extract downloaded files.
+tar -xf binutils-2.37.tar.xz;
+tar -xf gcc-11.2.0.tar.xz;
+
+# Set several env vars.
+# Make sure you are working in 'build' directory when using $PWD.
+export PREFIX="$PWD/opt/cross";
+export TARGET=i686-elf;
+export PATH="$PREFIX/bin:$PATH";
+
+# Build binutils.
+mkdir -pv build-binutils;
+cd build-binutils;
+../binutils-2.37/configure --target=$TARGET --prefix="$PREFIX" \
+  --with-sysroot --disable-nls --disable-werror;
+make -j$(nproc);
+make -j$(nproc) install;
+
+# Back to root project directory.
+cd ../..;
+
+# Build the kernel.
+make;
+make boot;
 
 Maintainer:
   - Ammar Faizi <ammarfaizi2@gnuweeb.org>

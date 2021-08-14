@@ -4,3 +4,5 @@
 *.swo
 *.log
 *.lock
+
+/build
