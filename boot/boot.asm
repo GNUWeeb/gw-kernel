@@ -66,10 +66,11 @@ start:
 	call	print_str
 
 
-	cli
 .end:
+	cli
+.end_loop:
 	hlt
-	jmp	.end
+	jmp	.end_loop
 
 
 ; print_str(const char *si);
