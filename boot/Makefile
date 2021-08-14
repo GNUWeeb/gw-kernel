@@ -3,6 +3,7 @@
 # Copyright (C) 2021  Ammar Faizi <ammarfaizi2@gmail.com>
 #
 
+DD	= dd
 RM	= rm
 NASM	= nasm
 QEMU	= qemu-system-x86_64
@@ -14,6 +15,8 @@ boot: boot.bin
 
 boot.bin: boot.asm
 	$(NASM) -fbin $(^) -o $(@)
+	$(DD) if=readme.txt >> $(@)
+	$(DD) if=/dev/zero bs=512 count=1 >> $(@)
 
 clean:
 	$(RM) -vf boot.bin
