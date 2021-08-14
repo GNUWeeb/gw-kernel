@@ -14,7 +14,7 @@ compiler to work with, below are the setup instructions.
 # Install dependencies.
 sudo apt-get install build-essential bison flex libgmp3-dev git \
 libmpc-dev libmpfr-dev texinfo libisl-dev make nasm \
-qemu-system-x86-y;
+qemu-system-x86 -y;
 
 # Clone the repository.
 git clone https://github.com/GNUWeeb/gw-kernel;
