@@ -13,6 +13,21 @@ __start:
 	times 33 db 0
 _start:
 	jmp	0x7c0:start
+
+int_0:
+	xor	bx, bx
+	mov	ah, 0xe
+	mov	al, 'A'
+	int	0x10
+	iret
+
+int_1:
+	xor	bx, bx
+	mov	ah, 0xe
+	mov	al, 'V'
+	int	0x10
+	iret
+
 start:
 	cli
 	mov	ax, 0x7c0
@@ -24,6 +39,18 @@ start:
 	mov	sp, 0x7c00
 	sti
 
+	mov	word [ss:0x00], int_0
+	mov	word [ss:0x02], 0x7c0
+	mov	word [ss:0x00], int_1
+	mov	word [ss:0x02], 0x7c0
+
+	; Call routine based on interrupt vector table 0x1
+	int	0x1
+
+	; Call routine based on interrupt vector table 0x0 (exception division by zero)
+	mov	ax, 0
+	div	ax
+
 	mov	si, msg
 	call	print
 	cli
@@ -33,7 +60,7 @@ end:
 
 
 print:
-	mov	bx, 0
+	xor	bx, bx
 .pr_loop:
 	lodsb
 	test	al, al
