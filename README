@@ -54,10 +54,10 @@ cd ..;
 mkdir -pv build-gcc;
 cd build-gcc;
 ../gcc-11.2.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers;
-taskset -c 2,3 make -j4 all-gcc && \
-taskset -c 2,3 make -j4 all-target-libgcc && \
-taskset -c 2,3 make -j4 install-gcc && \
-taskset -c 2,3 make -j4 install-target-libgcc;
+make -j4 all-gcc && \
+make -j4 all-target-libgcc && \
+make -j4 install-gcc && \
+make -j4 install-target-libgcc;
 
 # Back to root project directory.
 cd ../..;
