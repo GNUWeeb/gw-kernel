@@ -1,0 +1,6 @@
+*.o
+*.tmp
+*.swp
+*.swo
+*.log
+*.lock
