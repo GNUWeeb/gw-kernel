@@ -78,6 +78,15 @@ load32:
 	mov	ebp, 0x00200000
 	mov	esp, ebp
 	cli
+
+	;
+	; Enable the A20 line
+	; Ref: https://wiki.osdev.org/A20_Line
+	;
+	in	al, 0x92
+	or	al, 0x2
+	out	0x92, al
+
 .end_loop:
 	hlt
 	jmp	.end_loop
