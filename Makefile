@@ -1,9 +1,33 @@
 # SPDX-License-Identifier: GPL-2.0
 
+
+ifdef TARGET
+	CC := $(TARGET)-gcc
+	CXX := $(TARGET)-g++
+	AS := $(TARGET)-as
+	LD := $(TARGET)-ld
+else
+	CC := gcc
+	CXX := g++
+	AS := as
+	LD := ld
+endif
+
+export NASM=nasm
+export CC
+export CXX
+export AS
+export LD
+
 HOSTCC := cc
-HOSTLD := ld
 HOSTCXX := cxx
+HOSTLD := ld
 MKFLAGS := --no-print-directory
+
+export HOSTCC
+export HOSTCXX
+export HOSTLD
+export MKFLAGS
 
 all:
 	+$(MAKE) $(MKFLAGS) -f boot/Makefile
