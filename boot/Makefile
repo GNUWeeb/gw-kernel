@@ -3,9 +3,6 @@
 # Copyright (C) 2021  Ammar Faizi <ammarfaizi2@gmail.com>
 #
 
-LDFLAGS = -g
-CFLAGS = -g -O0 -ffreestanding -nostdlib
-NASM_FLAGS = -g
 QEMU = qemu-system-x86_64
 
 all: boot/gw-kernel.bin
