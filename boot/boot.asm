@@ -10,13 +10,13 @@
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
 
-__start:
-	jmp	short _start
+__boot:
+	jmp	short _boot
 	nop
-	times 33 db 0
-_start:
-	jmp	0x0:start
-start:
+	times 33 db 0x90
+_boot:
+	jmp	0x0:boot
+boot:
 	cli
 	xor	ax, ax
 	mov	ds, ax
@@ -25,17 +25,14 @@ start:
 	xor	ax, ax
 	mov	ss, ax
 	mov	sp, 0x7c00
-	sti
 
 .load_protected:
-	cli
+	; We are entering the protected mode!
 	lgdt	[gdt_descriptor]
-	; Whee, we are entering the protected mode!
 	mov	eax, cr0
 	or	eax, 1
 	mov	cr0, eax
 	jmp	CODE_SEG:load32
-
 
 ; GDT
 gdt_start:
@@ -68,29 +65,80 @@ gdt_descriptor:
 
 [BITS 32]
 load32:
-.end:
-	mov	ax, DATA_SEG
-	mov	ds, ax
-	mov	es, ax
-	mov	fs, ax
-	mov	gs, ax
-	mov	ss, ax
-	mov	ebp, 0x00200000
-	mov	esp, ebp
-	cli
+	mov	eax, 1
+	mov	ecx, 100
+	mov	edi, 0x0100000
+	call	ata_lba_read
+	jmp	CODE_SEG:0x0100000
 
-	;
-	; Enable the A20 line
-	; Ref: https://wiki.osdev.org/A20_Line
-	;
-	in	al, 0x92
-	or	al, 0x2
-	out	0x92, al
+;
+;=============================================================================
+; ATA read sectors (LBA mode) 
+;
+; @param EAX Logical Block Address of sector
+; @param CL  Number of sectors to read
+; @param RDI The address of buffer to put data obtained from disk
+;
+; @return None
+;=============================================================================
+; Ref: https://wiki.osdev.org/ATA_read/write_sectors
+;
+ata_lba_read:
+	pushfd
+	and	eax, 0x0FFFFFFF
+	push	eax
+	push	ebx
+	push	ecx
+	push	edx
+	push	edi
 
-.end_loop:
-	hlt
-	jmp	.end_loop
+	mov	ebx, eax	; Save LBA in EBX
+	mov	edx, 0x01f6	; Port to send drive and bit 24 - 27 of LBA
+	shr	eax, 24		; Get bit 24 - 27 in al
+	or	al, 11100000b	; Set bit 6 in al for LBA mode
+	out	dx, al
 
+	mov	edx, 0x01f2	; Port to send number of sectors
+	mov	al, cl		; Get number of sectors from CL
+	out	dx, al
+
+	mov	edx, 0x1f3	; Port to send bit 0 - 7 of LBA
+	mov	eax, ebx	; Get LBA from EBX
+	out	dx, al
+
+	mov	edx, 0x1f4	; Port to send bit 8 - 15 of LBA
+	mov	eax, ebx	; Get LBA from EBX
+	shr	eax, 8		; Get bit 8 - 15 in AL
+	out	dx, al
+
+	mov	edx, 0x1f5	; Port to send bit 16 - 23 of LBA
+	mov	eax, ebx	; Get LBA from EBX
+	shr	eax, 16		; Get bit 16 - 23 in AL
+	out	dx, al
+
+	mov	edx, 0x1f7	; Command port
+	mov	al, 0x20	; Read with retry.
+	out	dx, al
+.still_going:
+	in	al, dx
+	test	al, 8		; the sector buffer requires servicing.
+	jz	.still_going	; until the sector buffer is ready.
+
+	mov	eax, 256	; to read 256 words = 1 sector
+	xor	bx, bx
+	mov	bl, cl		; read CL sectors
+	mul	bx
+	mov	ecx, eax	; ecx is counter for INSW
+	mov	edx, 0x1f0	; Data port, in and out
+	rep	insw		; in to [edi]
+
+	pop	edi
+	pop	edx
+	pop	ecx
+	pop	ebx
+	pop	eax
+	popfd
+	ret
 
 end_of_code:
 	times 510 - ($ - $$) db 0
