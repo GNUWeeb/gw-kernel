@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: GPL-2.0
 
-MKFLAGS = --no-print-directory
+HOSTCC := cc
+HOSTLD := ld
+HOSTCXX := cxx
+MKFLAGS := --no-print-directory
 
 all:
-	+$(MAKE) $(MKFLAGS) -C boot/
+	+$(MAKE) $(MKFLAGS) -f boot/Makefile
 
 clean:
-	+$(MAKE) $(MKFLAGS) -C boot/ clean	
+	+$(MAKE) $(MKFLAGS) -f boot/Makefile clean
 
 boot:
-	+$(MAKE) $(MKFLAGS) -C boot/ boot
+	+$(MAKE) $(MKFLAGS) -f boot/Makefile boot
 
 .PHONY: all clean boot
