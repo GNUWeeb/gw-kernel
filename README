@@ -1,6 +1,6 @@
 
 GNU/Weeb kernel
-============
+================
 
 This is not yet a mother of any operating system. Under development.
 
@@ -38,14 +38,22 @@ tar -xf gcc-11.2.0.tar.xz;
 export PREFIX="$PWD/opt/cross";
 export TARGET=i686-elf;
 export PATH="$PREFIX/bin:$PATH";
+mkdir -pv $PREFIX;
 
 # Build binutils.
 mkdir -pv build-binutils;
 cd build-binutils;
 ../binutils-2.37/configure --target=$TARGET --prefix="$PREFIX" \
   --with-sysroot --disable-nls --disable-werror;
-make -j$(nproc) && \
-make -j$(nproc) install;
+make -j4 && \
+make -j4 install;
+
+# Back to 'build' directory.
+cd ..;
+
+# Invoke GCC extra deps
+cd gcc-11.2.0;
+./contrib/download_prerequisites;
 
 # Back to 'build' directory.
 cd ..;
