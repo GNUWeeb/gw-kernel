@@ -1,4 +1,11 @@
-# SPDX-License-Identifier: GPL-2.0
+#
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# @author Ammar Faizi <ammarfaizi2@gmail.com> https://www.facebook.com/ammarfaizi2
+# @license GNU GPL-2.0-only
+#
+# Build printing construction.
+#
 
 #
 # Verbose option

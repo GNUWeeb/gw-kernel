@@ -2,3 +2,6 @@
 #
 # Copyright (C) 2021  Ammar Faizi <ammarfaizi2@gmail.com>
 #
+
+OBJ_PRE_CC += \
+	$(BASE_DIR)/kernel/kernel.o

@@ -37,27 +37,19 @@ READELF	:= readelf
 CC	:= i686-elf-gcc
 CXX	:= i686-elf-g++
 LD	:= i686-elf-ld
-QEMU	:= qemu-system-x86_64
-DD	:= dd
-
-NASM_FLAGS := -O0
 
 # `C_CXX_FLAGS` will be appended to `CFLAGS` and `CXXFLAGS`.
 C_CXX_FLAGS := \
-	-ggdb3 \
 	-fstrict-aliasing \
 	-fno-stack-protector \
 	-fno-omit-frame-pointer \
+	-fdata-sections \
+	-ffunction-sections \
 	-nostdlib \
 	-nostartfiles \
 	-nodefaultlibs \
-	-ffreestanding \
 	-fno-builtin \
-	-falign-jumps \
-	-falign-functions \
-	-falign-labels \
-	-falign-loops \
-	-fstrength-reduce \
+	-ffreestanding \
 	-D_GNU_SOURCE \
 	-DVERSION=$(VERSION) \
 	-DPATCHLEVEL=$(PATCHLEVEL) \
@@ -111,6 +103,11 @@ endif
 include $(BASE_DIR)/scripts/build/flags.make
 include $(BASE_DIR)/scripts/build/print.make
 
+# Include sub directories.
+include $(BASE_DIR)/kernel/Makefile
+include $(BASE_DIR)/boot/Makefile
+
+
 #
 # These empty assignments force the variables to be a simple variable.
 #
@@ -128,12 +125,7 @@ OBJ_PRE_CC	:=
 OBJ_TMP_CC	:=
 
 
-all: $(BASE_DIR)/boot/gw-kernel.bin
-
-
-# Include sub directories.
-include $(BASE_DIR)/kernel/Makefile
-include $(BASE_DIR)/boot/Makefile
+all: $(TARGET_BIN)
 
 
 #

@@ -3,31 +3,35 @@
 # Copyright (C) 2021  Ammar Faizi <ammarfaizi2@gmail.com>
 #
 
-QEMU = qemu-system-x86_64
-
-all: boot/gw-kernel.bin
-
-boot/boot.bin: boot/boot.asm
+$(BASE_DIR)/boot/boot.bin: $(BASE_DIR)/boot/boot.asm
 	$(NASM) $(NASM_FLAGS) -fbin $(<) -o $(@)
 
-boot/kernel.o: boot/kernel.asm
-	$(NASM) $(NASM_FLAGS) -felf $(<) -o $(@)
+$(BASE_DIR)/boot/__kernel.asm.o: $(BASE_DIR)/boot/kernel.asm
+	$(NASM) $(NASM_FLAGS) -g -felf $(<) -o $(@)
 
-boot/kernel_full.o: boot/kernel.o
-	$(LD) $(LDFLAGS) -relocatable $(^) -o $(@)
+$(BASE_DIR)/boot/kernel.o: $(BASE_DIR)/boot/kernel.c
+	$(CC) $(CFLAGS) -ggdb3 -c $(^) -o $(@)
 
-boot/kernel.bin: boot/kernel_full.o boot/linker.ld
-	$(CC) $(CFLAGS) -T boot/linker.ld $(<) -o $(@)
+$(BASE_DIR)/boot/kernelfull.o: $(BASE_DIR)/boot/__kernel.asm.o $(BASE_DIR)/boot/kernel.o
+	$(LD) $(LDFLAGS) -g -relocatable $(^) -o $(@)
 
-boot/gw-kernel.bin: boot/boot.bin boot/kernel.bin
-	$(DD) if=boot/boot.bin > $(@)
-	$(DD) if=boot/kernel.bin >> $(@)
-	$(DD) if=/dev/zero bs=512 count=100 >> $(@)
+$(BASE_DIR)/boot/kernel.bin: $(BASE_DIR)/boot/kernelfull.o
+	$(CC) $(CFLAGS) -T $(BASE_DIR)/scripts/build/linker.ld $(^) -o $(@)
 
-boot: boot/gw-kernel.bin
-	$(QEMU) -hda $(<)
+$(BASE_DIR)/boot/gw-kernel.bin: $(BASE_DIR)/boot/boot.bin $(BASE_DIR)/boot/kernel.bin
+	$(DD) if=$(BASE_DIR)/boot/boot.bin > $(@)
+	$(DD) if=$(BASE_DIR)/boot/kernel.bin >> $(@)
+	$(DD) if=/dev/zero bs=512 count=1000 >> $(@)
 
-clean:
-	$(RM) -vf boot/boot.bin boot/kernel.o boot/kernel_full.o boot/kernel.bin boot/gw-kernel.bin
+do_qemu_boot: $(BASE_DIR)/boot/gw-kernel.bin
+# 	$(QEMU) -hda $(<)
 
-.PHONY: all clean boot
+boot_clean:
+	$(Q)$(RM) -vf \
+		$(BASE_DIR)/boot/boot.bin \
+		$(BASE_DIR)/boot/kernel.o \
+		$(BASE_DIR)/boot/kernelfull.o \
+		$(BASE_DIR)/boot/kernel.bin \
+		$(BASE_DIR)/boot/gw-kernel.bin
+
+.PHONY: all do_qemu_boot boot_clean

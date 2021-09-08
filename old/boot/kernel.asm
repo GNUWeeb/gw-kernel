@@ -6,15 +6,13 @@
 
 [BITS 32]
 
-[section .text]
-
 global _start
-extern kernel_start
 
 CODE_SEG equ 0x08
 DATA_SEG equ 0x10
 
 _start:
+.end:
 	mov	ax, DATA_SEG
 	mov	ds, ax
 	mov	es, ax
@@ -33,8 +31,8 @@ _start:
 	or	al, 0x2
 	out	0x92, al
 
-	call	kernel_start
-
-_end_loop:
+.end_loop:
 	hlt
-	jmp	_end_loop
+	jmp	.end_loop
+
+	times 512 - ($ - $$) db 0
