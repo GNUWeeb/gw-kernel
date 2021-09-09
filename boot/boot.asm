@@ -5,7 +5,7 @@
 ;
 
 [org 0x7c00]
-[BITS 16]
+[bits 16]
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
@@ -26,7 +26,92 @@ boot:
 	mov	ss, ax
 	mov	sp, 0x7c00
 
-.load_protected:
+	call	check_a20
+	test	ax, ax
+	jnz	enter_protected_mode
+
+	mov	di, str1
+	call	print
+	jmp	do_halt
+str1:
+	db	"A20 is disabled!", 0
+
+
+print:
+	pushf
+	cli
+	pusha
+	mov	ah, 0x0e ; TTY mode
+.pr_loop:
+	mov	al, [di]
+	test	al, al
+	jz	.pr_ret
+
+	int	0x10
+
+	inc	di
+	jmp	.pr_loop
+.pr_ret:
+	popa
+	sti
+	popf
+	ret
+
+do_halt:
+	hlt
+	jmp	do_halt
+
+[bits 16]
+; Function: check_a20
+;
+; Purpose: To check the status of the a20 line in a completely
+;          self-contained state-preserving way. The function can be
+;          modified as necessary by removing push's at the beginning and
+;          their respective pop's at the end if complete self-containment
+;          is not required.
+;
+; Returns: 0 in ax if the a20 line is disabled (memory wraps around)
+;          1 in ax if the a20 line is enabled (memory does not wrap around)
+;
+; Link: https://wiki.osdev.org/A20_Line
+;
+check_a20:
+	pushf
+	push	ds
+	push	es
+	push	di
+	push	si
+	cli
+	xor	ax, ax	; ax = 0
+	mov	es, ax
+	not	ax	; ax = 0xFFFF
+	mov	ds, ax
+	mov	di, 0x0500
+	mov	si, 0x0510
+	mov	al, byte [es:di]
+	push	ax
+	mov	al, byte [ds:si]
+	push	ax
+	mov	byte [es:di], 0x00
+	mov	byte [ds:si], 0xFF
+	cmp	byte [es:di], 0xFF
+	pop	ax
+	mov	byte [ds:si], al
+	pop	ax
+	mov	byte [es:di], al
+	mov	ax, 0
+	je	check_a20__exit
+	mov	ax, 1
+check_a20__exit:
+	pop	si
+	pop	di
+	pop	es
+	pop	ds
+	popf
+	ret
+
+
+enter_protected_mode:
 	; We are entering the protected mode!
 	lgdt	[gdt_descriptor]
 	mov	eax, cr0
@@ -63,11 +148,12 @@ gdt_descriptor:
 	dw	gdt_end - gdt_start - 1
 	dd	gdt_start
 
+
 [BITS 32]
 load32:
 	mov	eax, 1
-	mov	ecx, 255
-	mov	edi, 0x0100000
+	mov	ecx, 100
+	mov	edi, 0x100000
 	call	ata_lba_read
 	jmp	CODE_SEG:0x0100000
 
