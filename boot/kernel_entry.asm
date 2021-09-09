@@ -9,7 +9,7 @@
 [section .text]
 
 global _start
-extern kernel_start
+extern kernel_main
 
 CODE_SEG equ 0x08
 DATA_SEG equ 0x10
@@ -21,8 +21,8 @@ _start:
 	mov	fs, ax
 	mov	gs, ax
 	mov	ss, ax
-	mov	ebp, 0x00200000
-	mov	esp, ebp
+	xor	ebp, ebp
+	mov	esp,  0x00200000
 	cli
 
 	;
@@ -33,7 +33,7 @@ _start:
 	or	al, 0x2
 	out	0x92, al
 
-	call	kernel_start
+	call	kernel_main
 
 _end_loop:
 	hlt
