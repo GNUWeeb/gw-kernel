@@ -7,17 +7,7 @@
 #define BOOT__IDT_H
 
 #include "config.h"
-#include <stdint.h>
-
-#ifdef __x86_64__
-typedef unsigned long long int uword_t;
-#else
-typedef unsigned int uword_t;
-#endif
-
-#define __packed __attribute__((packed))
-#define __idt_func __attribute__((interrupt,no_caller_saved_registers))
-
+#include <gwk/common.h>
 
 struct idt_desc {
 	uint16_t	offset_1;
