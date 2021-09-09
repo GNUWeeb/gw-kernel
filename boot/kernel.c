@@ -10,5 +10,8 @@
 void kernel_main(void)
 {
 	vga_mem_init();
-	vga_print("Hello World!");
+	vga_print("\n\n");
+	vga_print("GNU/Weeb Kernel");
+	vga_print("\n\n");
+
 }

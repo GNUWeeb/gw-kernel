@@ -10,7 +10,7 @@
 #include <stddef.h>
 
 #define VGA_WIDTH	80u
-#define VGA_HEIGHT	20u
+#define VGA_HEIGHT	25u
 
 extern void vga_mem_init(void);
 extern void vga_print(const char *str);
