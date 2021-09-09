@@ -8,4 +8,4 @@
 
 extern void kernel_main(void);
 
-#endif
+#endif /* #ifndef BOOT__KERNEL_H */

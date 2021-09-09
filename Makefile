@@ -101,7 +101,7 @@ BASE_DIR	:= $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 BASE_DIR	:= $(strip $(patsubst %/, %, $(BASE_DIR)))
 BASE_DEP_DIR	:= $(BASE_DIR)/.deps
 MAKEFILE_FILE	:= $(lastword $(MAKEFILE_LIST))
-INCLUDE_DIR	= -I$(BASE_DIR)
+INCLUDE_DIR	= -I$(BASE_DIR) -Iinclude
 
 
 ifneq ($(words $(subst :, ,$(BASE_DIR))), 1)
@@ -132,8 +132,9 @@ all: $(TARGET_BIN)
 
 
 # Include sub directories.
-include $(BASE_DIR)/kernel/Makefile
 include $(BASE_DIR)/boot/Makefile
+include $(BASE_DIR)/kernel/Makefile
+include $(BASE_DIR)/lib/Makefile
 
 
 #
@@ -157,7 +158,7 @@ $(OBJ_PRE_CC): $(MAKEFILE_FILE) | $(DEP_DIRS)
 #
 $(OBJ_CC):
 	$(CC_PRINT)
-	$(CC) $(DEPFLAGS) $(CFLAGS) -c $(O_TO_C) -o $(@)
+	$(Q)$(CC) $(DEPFLAGS) $(CFLAGS) -c $(O_TO_C) -o $(@)
 
 
 #
