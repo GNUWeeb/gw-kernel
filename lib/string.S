@@ -1,7 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2021  Ammar Faizi <ammarfaizi2@gmail.com>
+ */
 
 .section .text
 .global memset
 .global memcpy
+.global memmove
 
 # void *memset(void *p, int c, size_t len);
 memset:
@@ -15,7 +20,9 @@ memset:
 	popl	%edi
 	ret
 
+# void *memmove(void *dst, const void *src, size_t len);
 # void *memcpy(void *__restrict__ dst, const void *__restrict__ src, size_t len);
+memmove:
 memcpy:
 	pushl	%edi
 	pushl	%esi
