@@ -5,7 +5,7 @@
 
 #include "idt.h"
 #include "kernel.h"
-#include "print_vga.h"
+#include "vga_print.h"
 #include <gwk/io.h>
 
 void kernel_main(void)

@@ -24,7 +24,7 @@ struct idtr_desc {
 } __packed;
 
 
-struct interrupt_frame {
+struct intr_frame {
 	uword_t ip;
 	uword_t cs;
 	uword_t flags;
@@ -36,10 +36,9 @@ struct interrupt_frame {
 extern struct idt_desc idt_descriptors[GWK_TOTAL_INTERRUPTS];
 extern struct idtr_desc idtr_descriptor;
 
-extern void idt_set(int int_no, void *addr);
+extern void idt_set(uint16_t int_no, void *addr);
 extern void idt_init(void);
 
-extern __idt_func void idt_func000(struct interrupt_frame *frame);
-extern __idt_func void no_interrupt_handler(struct interrupt_frame *frame);
+__idt_func void int21_handler(struct intr_frame *frame);
 
 #endif /* #ifndef BOOT__IDT_H */

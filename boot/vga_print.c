@@ -3,7 +3,7 @@
  * Copyright (C) 2021  Ammar Faizi <ammarfaizi2@gmail.com>
  */
 
-#include "print_vga.h"
+#include "vga_print.h"
 #include <gwk/string.h>
 
 static volatile uint16_t vga_x_pos;

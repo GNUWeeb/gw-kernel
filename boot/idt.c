@@ -4,7 +4,7 @@
  */
 
 #include "idt.h"
-#include "print_vga.h"
+#include "vga_print.h"
 #include <gwk/string.h>
 
 
@@ -12,27 +12,22 @@ struct idt_desc idt_descriptors[GWK_TOTAL_INTERRUPTS];
 struct idtr_desc idtr_descriptor;
 
 
-static inline void idt_load(register struct idtr_desc *addr)
+static __always_inline void idt_load(register struct idtr_desc *addr)
 {
-	__asm__ volatile(
-		"lidt (%0)"
-		: "+b"(addr)
-		:
-		: "memory"
-	);
+	__asm__ volatile("lidt (%0)":"+b"(addr) :: "memory");
 }
 
 
-__idt_func void idt_func000(struct interrupt_frame *frame)
+__idt_func void int21_handler(struct intr_frame *frame)
 {
-	(void)frame;
-	vga_print("Divide by zero error!\n");
+	vga_print("Keyboard interrupt!");
 }
 
 
-void idt_set(int int_no, void *addr)
+void idt_set(uint16_t int_no, void *addr)
 {
 	struct idt_desc *desc = &idt_descriptors[int_no];
+
 	desc->offset_1 = (uint16_t)((uint32_t)addr & 0x0000ffff);
 	desc->selector = KERNEL_CODE_SELECTOR;
 	desc->zero = 0x00;
@@ -46,5 +41,6 @@ void idt_init(void)
 	memset(idt_descriptors, 0, sizeof(idt_descriptors));
 	idtr_descriptor.limit = sizeof(idt_descriptors) - 1;
 	idtr_descriptor.base = (uint32_t)idt_descriptors;
+	// idt_set(0x21, int21_handler);
 	idt_load(&idtr_descriptor);
 }
