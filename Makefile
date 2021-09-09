@@ -195,15 +195,16 @@ $(TARGET_BIN): $(BASE_DIR)/boot/boot.bin $(BASE_DIR)/kernelfull.bin
 	$(DD_PRINT)
 	$(Q)$(DD) if=$(BASE_DIR)/boot/boot.bin > $(@)
 	$(Q)$(DD) if=$(BASE_DIR)/kernelfull.bin >> $(@)
-	$(Q)$(DD) if=/dev/zero bs=512 count=1000 >> $(@)
+	$(Q)$(DD) if=/dev/zero bs=1024 count=10 >> $(@)
 
 
 qemu_boot: $(TARGET_BIN)
-	$(Q)$(QEMU) -hda $(TARGET_BIN)
+	$(Q)$(QEMU) -hda $(TARGET_BIN) -d int -no-reboot -no-shutdown
 
 
 clean:
-	$(Q)$(RM) -vf \
+	$(Q)$(RM) -rfv \
+		$(DEP_DIRS) \
 		$(BASE_DIR)/boot/boot.bin \
 		$(BASE_DIR)/kernelfull.o \
 		$(BASE_DIR)/kernelfull.bin \

@@ -44,10 +44,7 @@ void idt_set(int int_no, void *addr)
 void idt_init(void)
 {
 	memset(idt_descriptors, 0, sizeof(idt_descriptors));
-
 	idtr_descriptor.limit = sizeof(idt_descriptors) - 1;
 	idtr_descriptor.base = (uint32_t)idt_descriptors;
-
-	idt_set(0, idt_func000);
 	idt_load(&idtr_descriptor);
 }

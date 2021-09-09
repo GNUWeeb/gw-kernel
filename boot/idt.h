@@ -40,5 +40,6 @@ extern void idt_set(int int_no, void *addr);
 extern void idt_init(void);
 
 extern __idt_func void idt_func000(struct interrupt_frame *frame);
+extern __idt_func void no_interrupt_handler(struct interrupt_frame *frame);
 
 #endif /* #ifndef BOOT__IDT_H */

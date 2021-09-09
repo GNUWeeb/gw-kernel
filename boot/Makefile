@@ -12,6 +12,12 @@ OBJ_PRE_CC += \
 	$(BASE_DIR)/boot/idt.o
 
 
+BOOT_FRAGMENTS := \
+	$(BASE_DIR)/boot/boot_fragments/00_boot_header.asm \
+	$(BASE_DIR)/boot/boot_fragments/01_gdt_entry.asm \
+	$(BASE_DIR)/boot/boot_fragments/02_boot_footer.asm
+
+
 $(BASE_DIR)/boot/kernel_entry.o: $(BASE_DIR)/boot/kernel_entry.asm
 	$(NASM_PRINT)
 	$(Q)$(NASM) $(NASMFLAGS) -felf32 $(<) -o $(@)
@@ -32,7 +38,15 @@ $(BASE_DIR)/boot/idt.o: $(BASE_DIR)/boot/idt.c
 	$(Q)$(CC) $(DEPFLAGS) $(CFLAGS) -c $(O_TO_C) -o $(@)
 
 
+$(BASE_DIR)/boot/boot_fragments/01_gdt_entry.asm: $(BASE_DIR)/boot/boot_fragments/gen_gdt.c
+	$(S)echo "Generating GDT..."
+	$(Q)$(CC) -Wall -Wextra $(<) -o $(<:%.c=%)
+	$(Q)$(<:%.c=%) > $(@)
+
+
+$(BASE_DIR)/boot/boot.asm: $(BOOT_FRAGMENTS)
+# Nop
+
 $(BASE_DIR)/boot/boot.bin: $(BASE_DIR)/boot/boot.asm
 	$(NASM_PRINT)
-	$(Q)$(NASM) $(NASMFLAGS) -fbin $(<) -o $(@)
-
+	$(Q)cd $(BASE_DIR)/boot && $(NASM) $(NASMFLAGS) -fbin $(<) -o $(@) && cd $(BASE_DIR);
