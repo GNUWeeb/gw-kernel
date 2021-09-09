@@ -24,7 +24,6 @@ EXTRAVERSION := $(EXTRAVERSION)-$(GIT_HASH)
 # Bin
 #
 NASM	:= nasm
-AS	:= as
 HOSTCC 	:= cc
 HOSTCXX	:= c++
 HOSTLD	:= $(CXX)
@@ -34,17 +33,26 @@ STRIP	:= strip
 OBJCOPY	:= objcopy
 OBJDUMP	:= objdump
 READELF	:= readelf
-CC	:= i686-elf-gcc
-CXX	:= i686-elf-g++
-LD	:= i686-elf-ld
+# AS	:= i686-elf-as
+# CC	:= i686-elf-gcc
+# CXX	:= i686-elf-g++
+# LD	:= i686-elf-ld
+AS	:= as
+CC	:= cc
+CXX	:= c++
+LD	:= ld
 QEMU	:= qemu-system-x86_64
 DD	:= dd
 
-NASM_FLAGS := -O2 -g
+ASFLAGS := -melf_i386
+LDFLAGS := -melf_i386
+NASMFLAGS := -O2 -g
 
 # `C_CXX_FLAGS` will be appended to `CFLAGS` and `CXXFLAGS`.
 C_CXX_FLAGS := \
+	-m32 \
 	-ggdb3 \
+	-fno-pie \
 	-fstrict-aliasing \
 	-fno-stack-protector \
 	-fno-omit-frame-pointer \
@@ -58,6 +66,11 @@ C_CXX_FLAGS := \
 	-falign-labels \
 	-falign-loops \
 	-fstrength-reduce \
+	-mgeneral-regs-only \
+	-mno-sse \
+	-mno-avx \
+	-mskip-rax-setup \
+	-D__GNU_WEEB_KERNEL__ \
 	-D_GNU_SOURCE \
 	-DVERSION=$(VERSION) \
 	-DPATCHLEVEL=$(PATCHLEVEL) \

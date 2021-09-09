@@ -8,12 +8,13 @@ DEP_DIRS += $(BASE_DEP_DIR)/boot
 OBJ_PRE_CC += \
 	$(BASE_DIR)/boot/kernel_entry.o \
 	$(BASE_DIR)/boot/kernel.o \
-	$(BASE_DIR)/boot/print_vga.o
+	$(BASE_DIR)/boot/print_vga.o \
+	$(BASE_DIR)/boot/idt.o
 
 
 $(BASE_DIR)/boot/kernel_entry.o: $(BASE_DIR)/boot/kernel_entry.asm
 	$(NASM_PRINT)
-	$(Q)$(NASM) $(NASM_FLAGS) -felf $(<) -o $(@)
+	$(Q)$(NASM) $(NASMFLAGS) -felf32 $(<) -o $(@)
 
 
 $(BASE_DIR)/boot/kernel.o: $(BASE_DIR)/boot/kernel.c
@@ -26,7 +27,12 @@ $(BASE_DIR)/boot/print_vga.o: $(BASE_DIR)/boot/print_vga.c
 	$(Q)$(CC) $(DEPFLAGS) $(CFLAGS) -c $(O_TO_C) -o $(@)
 
 
+$(BASE_DIR)/boot/idt.o: $(BASE_DIR)/boot/idt.c
+	$(CC_PRINT)
+	$(Q)$(CC) $(DEPFLAGS) $(CFLAGS) -c $(O_TO_C) -o $(@)
+
+
 $(BASE_DIR)/boot/boot.bin: $(BASE_DIR)/boot/boot.asm
 	$(NASM_PRINT)
-	$(Q)$(NASM) $(NASM_FLAGS) -fbin $(<) -o $(@)
+	$(Q)$(NASM) $(NASMFLAGS) -fbin $(<) -o $(@)
 

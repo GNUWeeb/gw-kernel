@@ -33,10 +33,9 @@ boot:
 	mov	di, str1
 	call	print
 	jmp	do_halt
+
 str1:
 	db	"A20 is disabled!", 0
-
-
 print:
 	pushf
 	cli
@@ -61,20 +60,21 @@ do_halt:
 	hlt
 	jmp	do_halt
 
+
 [bits 16]
 ; Function: check_a20
 ;
-; Purpose: To check the status of the a20 line in a completely
-;          self-contained state-preserving way. The function can be
-;          modified as necessary by removing push's at the beginning and
-;          their respective pop's at the end if complete self-containment
-;          is not required.
+; Purpose:
+; To check the status of the a20 line in a completely self-contained
+; state-preserving way. The function can be modified as necessary by
+; removing push's at the beginning and their respective pop's at the end
+; if complete self-containment is not required.
 ;
-; Returns: 0 in ax if the a20 line is disabled (memory wraps around)
-;          1 in ax if the a20 line is enabled (memory does not wrap around)
+; Returns:
+; - 0 in ax if the a20 line is disabled (memory wraps around)
+; - 1 in ax if the a20 line is enabled (memory does not wrap around)
 ;
 ; Link: https://wiki.osdev.org/A20_Line
-;
 check_a20:
 	pushf
 	push	ds

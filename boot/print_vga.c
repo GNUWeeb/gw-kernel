@@ -4,10 +4,11 @@
  */
 
 #include "print_vga.h"
+#include <gwk/string.h>
 
-static uint16_t vga_x_pos;
-static uint16_t vga_y_pos;
-static uint16_t (*video_mem)[VGA_WIDTH];
+static volatile uint16_t vga_x_pos;
+static volatile uint16_t vga_y_pos;
+static volatile uint16_t (*video_mem)[VGA_WIDTH];
 
 
 static inline uint16_t vga_make_char(uint8_t c, uint8_t color)
@@ -45,7 +46,7 @@ void vga_mem_init(void)
 
 	vga_x_pos = 0;
 	vga_x_pos = 0;
-	video_mem = (void *)0xb8000;
+	video_mem = (volatile void *)0xb8000;
 
 	for (y = 0; y < VGA_HEIGHT; y++) {
 		for (x = 0; x < VGA_WIDTH; x++) {

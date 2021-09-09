@@ -15,6 +15,7 @@ CODE_SEG equ 0x08
 DATA_SEG equ 0x10
 
 _start:
+	cli
 	mov	ax, DATA_SEG
 	mov	ds, ax
 	mov	es, ax
@@ -22,13 +23,9 @@ _start:
 	mov	gs, ax
 	mov	ss, ax
 	xor	ebp, ebp
-	mov	esp,  0x00200000
-	cli
+	mov	esp,  0x200000
+	and	esp, -16
 
-	;
-	; Enable the A20 line
-	; Ref: https://wiki.osdev.org/A20_Line
-	;
 	in	al, 0x92
 	or	al, 0x2
 	out	0x92, al
@@ -36,5 +33,6 @@ _start:
 	call	kernel_main
 
 _end_loop:
+	cli
 	hlt
 	jmp	_end_loop

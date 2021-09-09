@@ -9,7 +9,6 @@ OBJ_PRE_CC += \
 	$(BASE_DIR)/lib/string.o
 
 
-$(BASE_DIR)/lib/string.o: $(BASE_DIR)/lib/string.c
-	$(CC_PRINT)
-	$(Q)$(CC) $(DEPFLAGS) $(CFLAGS) -c $(O_TO_C) -o $(@)
-
+$(BASE_DIR)/lib/string.o: $(BASE_DIR)/lib/string.S
+	$(AS_PRINT)
+	$(Q)$(CC) $(CFLAGS) -c $(<) -o $(@)
