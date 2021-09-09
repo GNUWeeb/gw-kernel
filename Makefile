@@ -14,7 +14,7 @@ PATCHLEVEL = 0
 SUBLEVEL = 0
 EXTRAVERSION :=
 NAME =
-TARGET_BIN = gwkernel
+TARGET_BIN = gwkernel.bin
 PACKAGE_NAME = $(TARGET_BIN)-$(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
 
 GIT_HASH = $(shell git log --pretty=format:'%H' -n 1)
@@ -40,7 +40,7 @@ LD	:= i686-elf-ld
 QEMU	:= qemu-system-x86_64
 DD	:= dd
 
-NASM_FLAGS := -O0
+NASM_FLAGS := -O2 -g
 
 # `C_CXX_FLAGS` will be appended to `CFLAGS` and `CXXFLAGS`.
 C_CXX_FLAGS := \
@@ -69,7 +69,7 @@ C_CXX_FLAGS_RELEASE := -DNDEBUG
 C_CXX_FLAGS_DEBUG :=
 
 ifndef DEFAULT_OPTIMIZATION
-	DEFAULT_OPTIMIZATION := -O0
+	DEFAULT_OPTIMIZATION := -O2
 endif
 
 STACK_USAGE_SIZE := 2097152
@@ -128,7 +128,7 @@ OBJ_PRE_CC	:=
 OBJ_TMP_CC	:=
 
 
-all: $(BASE_DIR)/boot/gw-kernel.bin
+all: $(TARGET_BIN)
 
 
 # Include sub directories.
@@ -157,7 +157,7 @@ $(OBJ_PRE_CC): $(MAKEFILE_FILE) | $(DEP_DIRS)
 #
 $(OBJ_CC):
 	$(CC_PRINT)
-	$(Q)$(CC) $(PIE_FLAGS) $(DEPFLAGS) $(CFLAGS) -c $(O_TO_C) -o $(@)
+	$(CC) $(DEPFLAGS) $(CFLAGS) -c $(O_TO_C) -o $(@)
 
 
 #
@@ -167,16 +167,35 @@ $(OBJ_CC):
 -include $(OBJ_PRE_CC:$(BASE_DIR)/%.o=$(BASE_DEP_DIR)/%.d)
 
 
-#
-# Link the target bin.
-#
-$(TARGET_BIN): $(OBJ_CC) $(OBJ_PRE_CC)
+$(BASE_DIR)/kernelfull.o: $(OBJ_PRE_CC)
 	$(LD_PRINT)
-	$(Q)$(LD) $(PIE_FLAGS) $(LDFLAGS) $(^) -o "$(@)" $(LIB_LDFLAGS)
+	$(Q)$(LD) $(LDFLAGS) -g -relocatable $(^) -o $(@)
 
 
-clean: boot_clean
-	$(Q)$(RM) -vf $(TARGET_BIN) $(OBJ_CC) $(OBJ_PRE_CC)
+$(BASE_DIR)/kernelfull.bin: $(BASE_DIR)/kernelfull.o
+	$(CC_PRINT)
+	$(Q)$(CC) $(CFLAGS) -T $(BASE_DIR)/scripts/build/linker.ld $(^) -o $(@)
+
+
+$(TARGET_BIN): $(BASE_DIR)/boot/boot.bin $(BASE_DIR)/kernelfull.bin
+	$(DD_PRINT)
+	$(Q)$(DD) if=$(BASE_DIR)/boot/boot.bin > $(@)
+	$(Q)$(DD) if=$(BASE_DIR)/kernelfull.bin >> $(@)
+	$(Q)$(DD) if=/dev/zero bs=512 count=1000 >> $(@)
+
+
+qemu_boot: $(TARGET_BIN)
+	$(Q)$(QEMU) -hda $(TARGET_BIN)
+
+
+clean:
+	$(Q)$(RM) -vf \
+		$(BASE_DIR)/boot/boot.bin \
+		$(BASE_DIR)/kernelfull.o \
+		$(BASE_DIR)/kernelfull.bin \
+		$(TARGET_BIN) \
+		$(OBJ_CC) \
+		$(OBJ_PRE_CC)
 
 
 .PHONY: all clean

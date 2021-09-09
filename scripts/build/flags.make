@@ -49,11 +49,11 @@ C_CXX_FLAGS += $(WARN_FLAGS)
 # Release or debug?
 #
 ifeq ($(RELEASE_MODE),1)
-	LDFLAGS		+= -O3
-	C_CXX_FLAGS	+= -O3 $(C_CXX_FLAGS_RELEASE)
+	LDFLAGS		+= -O2
+	C_CXX_FLAGS	:= -O2 $(C_CXX_FLAGS) $(C_CXX_FLAGS_RELEASE)
 else
 	LDFLAGS		+= $(DEFAULT_OPTIMIZATION)
-	C_CXX_FLAGS	+= $(DEFAULT_OPTIMIZATION) $(C_CXX_FLAGS_DEBUG)
+	C_CXX_FLAGS	:= $(DEFAULT_OPTIMIZATION) $(C_CXX_FLAGS) $(C_CXX_FLAGS_DEBUG)
 
 	#
 	# Always sanitize debug build, unless otherwise specified.
@@ -71,6 +71,9 @@ DEPFLAGS = -MT "$@" -MMD -MP -MF "$(@:$(BASE_DIR)/%.o=$(BASE_DEP_DIR)/%.d)"
 
 # Convert *.o filename to *.c
 O_TO_C = $(@:$(BASE_DIR)/%.o=%.c)
+
+# Convert *.o filename to *.c
+O_TO_ASM = $(@:$(BASE_DIR)/%.o=%.asm)
 
 CFLAGS = $(C_CXX_FLAGS) $(INCLUDE_DIR)
 CXXFLAGS = $(C_CXX_FLAGS) $(INCLUDE_DIR)
